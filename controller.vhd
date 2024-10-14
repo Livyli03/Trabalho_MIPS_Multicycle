@@ -58,12 +58,12 @@ architecture struct of controller is
   
   signal aluop:  STD_LOGIC_VECTOR(1 downto 0);
   signal branch: STD_LOGIC;
-  signal pcwrite: STD_LOGIC;
+  signal sigpcwrite: STD_LOGIC;
 begin
   fsm_inst: fsm port map(
     op        => op,               -- Conecta o opcode à entrada de 'fsm'
     clk       => clk,              -- Conecta o clock à entrada de 'fsm'
-    pcwrite   => pcwrite,          -- Conecta a saída 'pcwrite' de 'fsm' ao sinal intermediário 'pcwrite'
+    pcwrite   => sigpcwrite,       -- Conecta a saída 'pcwrite' de 'fsm' ao sinal intermediário 'sigpcwrite'
     IorD      => IorD,             -- Conecta a saída 'IorD' de 'fsm' à saída de 'controller'
     irwrite   => irwrite,          -- Conecta a saída 'irwrite' de 'fsm' à saída de 'controller'
     pcsrc     => pcsrc,            -- Conecta a saída 'pcsrc' de 'fsm' à saída de 'controller'
@@ -83,6 +83,6 @@ begin
     alucontrol => alucontrol       -- Conecta a saída 'alucontrol' de 'aludec' à saída de 'controller'
   );
 
-  pcen <= (branch and zero) or pcwrite;
+  pcen <= (branch and zero) or sigpcwrite;
 
 end;
