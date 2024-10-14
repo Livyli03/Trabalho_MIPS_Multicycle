@@ -100,7 +100,7 @@ instrreg_inst: regenable generic map (32) port map (clk, irwrite, readdata, inst
 
 datareg_inst: reg generic map (32) port map (clk, readdata, data);
 
-mux_wa3_inst: mux2 generic map (32) port map (instr(20 downto 16), instr(15 downto 11), regdst, writereg_a3);
+mux_wa3_inst: mux2 generic map (5) port map (instr(20 downto 16), instr(15 downto 11), regdst, writereg_a3);
 
 mux_wd3_inst: mux2 generic map (32) port map (aluout, data, memtoreg, writedata3);
 
@@ -116,7 +116,7 @@ mux_alusrcA_inst: mux2 generic map (32) port map (pc, A, alusrcA, srcA);
 
 sl2_inst: sl2 port map (signimm, signimmsh);
 
-mux_alusrcB_inst: mux4 generic map (32) port map (writedata_B, '4', signimm, signimmsh, alusrcB, srcb);
+mux_alusrcB_inst: mux4 generic map (32) port map (writedata_B, "00000000000000000000000000000100", signimm, signimmsh, alusrcB, srcb);
 
 ula_inst: ula port map (srcA, srcb, alucontrol, aluresult, zero);
 
