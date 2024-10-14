@@ -15,12 +15,11 @@ entity datapath is -- MIPS datapath
         alusrcB: in STD_LOGIC_VECTOR (1 downto 0);
         alucontrol: in STD_LOGIC_VECTOR (2 downto 0);
         pcsrc: in STD_LOGIC;
+		  readdata: in STD_LOGIC_VECTOR(31 downto 0);
+		  addr: out STD_LOGIC_VECTOR (31 downto 0);
         zero: out STD_LOGIC;
-        readdata: buffer STD_LOGIC_VECTOR(31 downto 0);
-        writedata_B: buffer STD_LOGIC_VECTOR(31 downto 0);
-        A: buffer STD_LOGIC_VECTOR (31 downto 0);
-        aluresult: buffer STD_LOGIC_VECTOR (31 downto 0);
-        aluout: buffer STD_LOGIC_VECTOR (31 downto 0)
+		  instr: buffer STD_LOGIC_VECTOR (31 downto 0);
+        writedata_B: buffer STD_LOGIC_VECTOR(31 downto 0)
         );
 end datapath;
 
@@ -79,15 +78,17 @@ architecture struct of datapath is
 
 signal pc: STD_LOGIC_VECTOR (31 downto 0);
 signal pcnext: STD_LOGIC_VECTOR (31 downto 0);
-signal addr: STD_LOGIC_VECTOR (31 downto 0);
-signal instr: STD_LOGIC_VECTOR (31 downto 0);
 signal data: STD_LOGIC_VECTOR (31 downto 0);
 signal writereg_a3: STD_LOGIC_VECTOR (4 downto 0);
 signal writedata3: STD_LOGIC_VECTOR (31 downto 0);
 signal rd1, rd2: STD_LOGIC_VECTOR (31 downto 0);
+signal A: STD_LOGIC_VECTOR (31 downto 0);
 signal srcA: STD_LOGIC_VECTOR (31 downto 0);
 signal signimm, signimmsh: STD_LOGIC_VECTOR (31 downto 0);
 signal srcb: STD_LOGIC_VECTOR (31 downto 0);
+signal aluresult: STD_LOGIC_VECTOR (31 downto 0);
+signal aluout: STD_LOGIC_VECTOR (31 downto 0);
+
 
 begin
 
@@ -111,11 +112,11 @@ rd1reg_inst: reg generic map (32) port map (clk, rd1, A);
 
 rd2reg_inst: reg generic map (32) port map (clk, rd2, writedata_B);
 
-mux_alusrcA_inst: mux2 generic map (32) port map (A, pc, alusrcA, srcA);
+mux_alusrcA_inst: mux2 generic map (32) port map (pc, A, alusrcA, srcA);
 
 sl2_inst: sl2 port map (signimm, signimmsh);
 
-mux_alusrcB_inst: mux4 generic map (32) port map (writedata_B, 4, signimm, signimmsh, alusrcB, srcb);
+mux_alusrcB_inst: mux4 generic map (32) port map (writedata_B, '4', signimm, signimmsh, alusrcB, srcb);
 
 ula_inst: ula port map (srcA, srcb, alucontrol, aluresult, zero);
 
