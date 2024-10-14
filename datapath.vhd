@@ -19,7 +19,7 @@ entity datapath is -- MIPS datapath
         readdata: buffer STD_LOGIC_VECTOR(31 downto 0);
         writedata_B: buffer STD_LOGIC_VECTOR(31 downto 0);
         A: buffer STD_LOGIC_VECTOR (31 downto 0);
-        zero: buffer STD_LOGIC;
+        zero: out STD_LOGIC;
         aluresult: buffer STD_LOGIC_VECTOR (31 downto 0);
         aluout: buffer STD_LOGIC_VECTOR (31 downto 0)
         );
