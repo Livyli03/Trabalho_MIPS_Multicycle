@@ -10,7 +10,7 @@ entity mux4 is
 		        y: out STD_LOGIC_VECTOR(width-1 downto 0));
 end mux4;
 
-architecture synth of multplex4 is
+architecture synth of mux4 is
 begin
 y<= d0 when s = "00" else
 	 d1 when s = "01" else
