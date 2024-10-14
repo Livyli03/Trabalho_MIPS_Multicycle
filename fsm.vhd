@@ -61,7 +61,7 @@ if rising_edge(clk) then
             estado <= "1000";
             --if addi
             elsif op = "001000" then
-            estado <= "1010";
+            estado <= "1001";
             end if;
         elsif estado = "0010" then
             --if lw
@@ -70,9 +70,9 @@ if rising_edge(clk) then
             else
             estado <= "0101";
             end if;
+        elsif estado = "1001" then
+            estado <= "1010";
         elsif estado = "1010" then
-            estado <= "1011";
-        elsif estado = "1011" then
             estado <= "0000";
         elsif estado = "0011" then
             estado <= "0100";
@@ -214,35 +214,22 @@ if estado = "0000" then
         alusrcA <='1';
         regwrite <='0';
         regdst <= '0';
-    elsif estado = "1001" then
-        pcwrite <= '1';
-        branch <= '0';
-        IorD <= '0';
-        memwrite <= '0';
-        irwrite <= '0';
-        memtoreg <='0';
-        pcsrc <='1';
-        aluop <="00";
-        alusrcB <= "00";
-        alusrcA <='0';
-        regwrite <='0';
-        regdst <= '0';
     --addi execução
-    elsif estado = "1010" then
+    elsif estado = "1001" then
         pcwrite <= '0';
         branch <= '0';
         IorD <= '0';
         memwrite <= '0';
         irwrite <= '0';
         memtoreg <='0';
-        pcsrc <='1';
+        pcsrc <='0';
         aluop <="00";
         alusrcB <= "10";
         alusrcA <='1';
         regwrite <='0';
         regdst <= '0';
     --addi write back
-    elsif estado = "1011" then
+    elsif estado = "1010" then
         pcwrite <= '0';
         branch <= '0';
         IorD <= '0';
