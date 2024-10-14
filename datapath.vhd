@@ -15,11 +15,10 @@ entity datapath is -- MIPS datapath
         alusrcB: in STD_LOGIC_VECTOR (1 downto 0);
         alucontrol: in STD_LOGIC_VECTOR (2 downto 0);
         pcsrc: in STD_LOGIC;
-        pc: buffer STD_LOGIC_VECTOR (31 downto 0);
+        zero: out STD_LOGIC;
         readdata: buffer STD_LOGIC_VECTOR(31 downto 0);
         writedata_B: buffer STD_LOGIC_VECTOR(31 downto 0);
         A: buffer STD_LOGIC_VECTOR (31 downto 0);
-        zero: out STD_LOGIC;
         aluresult: buffer STD_LOGIC_VECTOR (31 downto 0);
         aluout: buffer STD_LOGIC_VECTOR (31 downto 0)
         );
@@ -78,6 +77,7 @@ architecture struct of datapath is
             );
     end component;
 
+signal pc: STD_LOGIC_VECTOR (31 downto 0);
 signal pcnext: STD_LOGIC_VECTOR (31 downto 0);
 signal addr: STD_LOGIC_VECTOR (31 downto 0);
 signal instr: STD_LOGIC_VECTOR (31 downto 0);
