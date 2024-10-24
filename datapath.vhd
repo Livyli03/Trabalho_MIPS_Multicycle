@@ -5,6 +5,7 @@ use IEEE.STD_LOGIC_ARITH.all;
 
 entity datapath is -- MIPS datapath
     port(clk: in STD_LOGIC;
+        reset: in STD_LOGIC;
         pcen: in STD_LOGIC;
         IorD: in STD_LOGIC;
         irwrite: in STD_LOGIC;
@@ -14,11 +15,11 @@ entity datapath is -- MIPS datapath
         alusrcA: in STD_LOGIC;
         alusrcB: in STD_LOGIC_VECTOR (1 downto 0);
         alucontrol: in STD_LOGIC_VECTOR (2 downto 0);
-        pcsrc: in STD_LOGIC;
-		  readdata: in STD_LOGIC_VECTOR(31 downto 0);
-		  addr: out STD_LOGIC_VECTOR (31 downto 0);
+        pcsrc: in STD_LOGIC_VECTOR (1 downto 0);
+        readdata: in STD_LOGIC_VECTOR(31 downto 0);
+        addr: out STD_LOGIC_VECTOR (31 downto 0);
         zero: out STD_LOGIC;
-		  instr: buffer STD_LOGIC_VECTOR (31 downto 0);
+        instr: buffer STD_LOGIC_VECTOR (31 downto 0);
         writedata_B: buffer STD_LOGIC_VECTOR(31 downto 0)
         );
 end datapath;
@@ -52,13 +53,13 @@ architecture struct of datapath is
             );
     end component;
     component reg generic (width: integer);
-        port(clk: in STD_LOGIC;
+        port(clk, reset: in STD_LOGIC;
             d: in STD_LOGIC_VECTOR (width-1 downto 0);
             q: out STD_LOGIC_VECTOR (width-1 downto 0)
             );
     end component;
     component regenable generic (width: integer);
-        port(clk, enable: in STD_LOGIC;
+        port(clk, enable, reset: in STD_LOGIC;
             d: in STD_LOGIC_VECTOR (width-1 downto 0);
             q: out STD_LOGIC_VECTOR (width-1 downto 0)
             );
@@ -86,19 +87,21 @@ signal A: STD_LOGIC_VECTOR (31 downto 0);
 signal srcA: STD_LOGIC_VECTOR (31 downto 0);
 signal signimm, signimmsh: STD_LOGIC_VECTOR (31 downto 0);
 signal srcb: STD_LOGIC_VECTOR (31 downto 0);
+signal instrsh: STD_LOGIC_VECTOR (27 downto 0);
+signal pcjump: STD_LOGIC_VECTOR (31 downto 0);
 signal aluresult: STD_LOGIC_VECTOR (31 downto 0);
 signal aluout: STD_LOGIC_VECTOR (31 downto 0);
 
 
 begin
 
-pcreg_inst: regenable generic map (32) port map (clk, pcen, pcnext, pc);
+pcreg_inst: regenable generic map (32) port map (clk, pcen, reset, pcnext, pc);
 
 mux_IorD_inst: mux2 generic map (32) port map (pc, aluout, IorD, addr);
 
-instrreg_inst: regenable generic map (32) port map (clk, irwrite, readdata, instr);
+instrreg_inst: regenable generic map (32) port map (clk, irwrite, reset, readdata, instr);
 
-datareg_inst: reg generic map (32) port map (clk, readdata, data);
+datareg_inst: reg generic map (32) port map (clk, reset, readdata, data);
 
 mux_wa3_inst: mux2 generic map (5) port map (instr(20 downto 16), instr(15 downto 11), regdst, writereg_a3);
 
@@ -108,9 +111,9 @@ regfile_inst: regfile port map (clk, regwrite, instr(25 downto 21), instr(20 dow
 
 signext_inst: signext port map (instr(15 downto 0), signimm);
 
-rd1reg_inst: reg generic map (32) port map (clk, rd1, A);
+rd1reg_inst: reg generic map (32) port map (clk, reset, rd1, A);
 
-rd2reg_inst: reg generic map (32) port map (clk, rd2, writedata_B);
+rd2reg_inst: reg generic map (32) port map (clk, reset, rd2, writedata_B);
 
 mux_alusrcA_inst: mux2 generic map (32) port map (pc, A, alusrcA, srcA);
 
@@ -120,8 +123,12 @@ mux_alusrcB_inst: mux4 generic map (32) port map (writedata_B, "0000000000000000
 
 ula_inst: ula port map (srcA, srcb, alucontrol, aluresult, zero);
 
-alureg_inst: reg generic map (32) port map (clk, aluresult, aluout);
+instr_sl2_inst: sl2 port map (instr(25 downto 0), instrsh);
 
-mux_pcsrc_inst: mux2 generic map (32) port map (aluresult, aluout, pcsrc, pcnext);
+pcjump <= pc(31 downto 28) & instrsh;
+
+alureg_inst: reg generic map (32) port map (clk, reset, aluresult, aluout);
+
+mux_pcsrc_inst: mux4 generic map (32) port map (aluresult, aluout, pcjump, pcsrc, pcnext);
 
 end struct;
