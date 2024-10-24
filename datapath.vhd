@@ -20,8 +20,8 @@ entity datapath is -- MIPS datapath
         addr: out STD_LOGIC_VECTOR (31 downto 0);
         zero: out STD_LOGIC;
         instr: buffer STD_LOGIC_VECTOR (31 downto 0);
-        writedata_B: buffer STD_LOGIC_VECTOR(31 downto 0)
-        );
+        writedata_B: buffer STD_LOGIC_VECTOR(31 downto 0);
+		  aluout: buffer STD_LOGIC_VECTOR (31 downto 0));
 end datapath;
 
 
@@ -87,10 +87,9 @@ signal A: STD_LOGIC_VECTOR (31 downto 0);
 signal srcA: STD_LOGIC_VECTOR (31 downto 0);
 signal signimm, signimmsh: STD_LOGIC_VECTOR (31 downto 0);
 signal srcb: STD_LOGIC_VECTOR (31 downto 0);
-signal instrsh: STD_LOGIC_VECTOR (27 downto 0);
+signal instrsh: STD_LOGIC_VECTOR (31 downto 0);
 signal pcjump: STD_LOGIC_VECTOR (31 downto 0);
 signal aluresult: STD_LOGIC_VECTOR (31 downto 0);
-signal aluout: STD_LOGIC_VECTOR (31 downto 0);
 
 
 begin
@@ -123,12 +122,12 @@ mux_alusrcB_inst: mux4 generic map (32) port map (writedata_B, "0000000000000000
 
 ula_inst: ula port map (srcA, srcb, alucontrol, aluresult, zero);
 
-instr_sl2_inst: sl2 port map (instr(25 downto 0), instrsh);
+instr_sl2_inst: sl2 port map ("000000" & instr(25 downto 0), instrsh);
 
-pcjump <= pc(31 downto 28) & instrsh;
+pcjump <= pc(31 downto 28) & instrsh(27 downto 0);
 
 alureg_inst: reg generic map (32) port map (clk, reset, aluresult, aluout);
 
-mux_pcsrc_inst: mux4 generic map (32) port map (aluresult, aluout, pcjump, pcsrc, pcnext);
+mux_pcsrc_inst: mux4 generic map (32) port map (aluresult, aluout, pcjump, "00000000000000000000000000000000", pcsrc, pcnext);
 
 end struct;
