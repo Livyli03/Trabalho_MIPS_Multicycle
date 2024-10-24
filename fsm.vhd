@@ -30,7 +30,7 @@ entity fsm is
 		   pcwrite		    : out  STD_LOGIC;
 		   IorD			    : out  STD_LOGIC;
 		   irwrite		    : out  STD_LOGIC;
-           pcsrc		    : out  STD_LOGIC;
+           pcsrc		    : out  STD_LOGIC_VECTOR (1 downto 0);
            alusrcA 		    : out  STD_LOGIC;
            alusrcB		    : out  STD_LOGIC_VECTOR (1 downto 0);
 		   aluop 			: out  STD_LOGIC_VECTOR (1 downto 0));
