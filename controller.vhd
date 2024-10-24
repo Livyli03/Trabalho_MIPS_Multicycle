@@ -23,11 +23,11 @@ entity controller is
        clk, zero:          in  STD_LOGIC;
        pcen:               out STD_LOGIC;
        memtoreg, memwrite: out STD_LOGIC;
-       pcsrc, alusrcA:     out STD_LOGIC;
+       alusrcA:            out STD_LOGIC;
        regdst, regwrite:   out STD_LOGIC;
        pcwrite, irwrite:   out STD_LOGIC;
        IorD:               out STD_LOGIC;
-       alusrcB:            out STD_LOGIC_VECTOR(1 downto 0);
+       pcsrc, alusrcB:     out STD_LOGIC_VECTOR(1 downto 0);
        alucontrol:         out STD_LOGIC_VECTOR(2 downto 0));
 end;
 
@@ -50,7 +50,7 @@ architecture struct of controller is
 		       pcwrite		  : out  STD_LOGIC;
 		       IorD			    : out  STD_LOGIC;
 		       irwrite		  : out  STD_LOGIC;
-           pcsrc		    : out  STD_LOGIC;
+           pcsrc		    : out  STD_LOGIC_VECTOR (1 downto 0);
            alusrcA 		  : out  STD_LOGIC;
            alusrcB		  : out  STD_LOGIC_VECTOR (1 downto 0);
 		       aluop 			  : out  STD_LOGIC_VECTOR (1 downto 0));
