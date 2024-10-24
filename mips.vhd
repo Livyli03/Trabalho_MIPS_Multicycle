@@ -42,7 +42,8 @@ architecture struct of mips is
         addr: out STD_LOGIC_VECTOR (31 downto 0);
         zero: out STD_LOGIC;
         instr: buffer STD_LOGIC_VECTOR (31 downto 0);
-        writedata_B: buffer STD_LOGIC_VECTOR(31 downto 0));
+        writedata_B: buffer STD_LOGIC_VECTOR(31 downto 0);
+		  aluout: buffer STD_LOGIC_VECTOR (31 downto 0));
   end component;
 
   -- Definindo os sinais intermediários
