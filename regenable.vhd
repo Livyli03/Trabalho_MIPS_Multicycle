@@ -10,15 +10,17 @@ use IEEE.STD_LOGIC_1164.all;
 
 entity regenable is 
   generic(width: integer);
-  port(clk, enable: in  STD_LOGIC;
+  port(clk, enable, reset: in  STD_LOGIC;
        d:          in  STD_LOGIC_VECTOR(width-1 downto 0);
        q:          out STD_LOGIC_VECTOR(width-1 downto 0));
 end;
 
 architecture synth of regenable is
 begin
-  process(clk, enable) begin
-    if enable = '1' and rising_edge(clk) then
+  process(clk, enable, reset) begin
+    if reset = '1' then  
+      q <= (others => '0');
+    elsif enable = '1' and rising_edge(clk) then
         q <= d;
     end if;
   end process;
