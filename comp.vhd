@@ -6,8 +6,8 @@ use IEEE.NUMERIC_STD.all;
 
 entity comp is
   port(clk, reset:          in  STD_LOGIC;
-       writedata_B, addr:   out STD_LOGIC_VECTOR(31 downto 0);
-       memwrite:            out STD_LOGIC);
+       writedata_B, addr:   buffer STD_LOGIC_VECTOR(31 downto 0);
+       memwrite:            buffer STD_LOGIC);
 end comp;
 
 architecture top of comp is
@@ -31,9 +31,6 @@ architecture top of comp is
   end component;
 
   -- Sinais intermediários entre MIPS e Memória
-  signal memwrite:     STD_LOGIC;
-  signal addr:         STD_LOGIC_VECTOR(31 downto 0);
-  signal writedata_B:  STD_LOGIC_VECTOR(31 downto 0);
   signal readdata:     STD_LOGIC_VECTOR(31 downto 0);
 
 begin
