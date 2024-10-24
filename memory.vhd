@@ -3,16 +3,16 @@ use IEEE.STD_LOGIC_1164.all;
 use IEEE.NUMERIC_STD.all;
 
 entity memory is 
-  port(clk, we, IorD:  in STD_LOGIC;
+  port(clk, we:  in STD_LOGIC;
        addr:     in STD_LOGIC_VECTOR(31 downto 0);
        wd:       in STD_LOGIC_VECTOR(31 downto 0);
        rd:       out STD_LOGIC_VECTOR(31 downto 0));
 end;
 
 architecture synth of memory is
-   -- Array de instruções (64 palavras de 32 bits)
-   type ram_type1 is array (63 downto 0) of STD_LOGIC_VECTOR(31 downto 0);
-   signal mem1: ram_type1 := (
+   -- Array de dados (128 palavras de 32 bits)
+   type ram_type is array (127 downto 0) of STD_LOGIC_VECTOR(31 downto 0);
+   signal mem: ram_type := (
 		    0 => x"20020005",  -- Instrução 1
               1 => x"2003000c",  -- Instrução 2
               2 => x"2067fff7",  -- Instrução 3
@@ -33,25 +33,20 @@ architecture synth of memory is
               17 => x"ac020054", -- Instrução 18
               others => (others => '0') -- Inicializa o restante com zeros
    );
-
-   -- Array de memória
-   type ram_type2 is array (63 downto 0) of STD_LOGIC_VECTOR(31 downto 0);
-   signal mem2: ram_type2 := (others => (others => '0')); -- inicializada com zeros
    
 begin
-   process(clk, we, IorD, addr, wd) 
+   process(clk)
    begin
-        -- Se IorD = '0' é leitura de instruções
-        if(we = '0' and IorD = '0') then
-             rd <= mem1(to_integer(unsigned(addr)));
-        -- Se IorD = '1' é leitura de dados
-        elsif(we = '0' and IorD = '1') then
-             rd <= mem2(to_integer(unsigned(addr(7 downto 2))));
-        -- Se IorD = '1' e we = '1' é escrita de dados
-        elsif(we = '1' and rising_edge(clk) and IorD = '1') then
-             -- Endereços de palavras avançam de 4 em 4. Por isso, se
-             -- desconsidera os 2 bits menos significativos do endereço
-             mem2(to_integer(unsigned(addr(7 downto 2)))) <= wd;
-        end if;
+      if rising_edge(clk) then  -- A operação ocorre na borda de subida do clock
+         -- Converte o endereço para inteiro para comparação
+         if we = '1' and to_integer(unsigned(addr(7 downto 2))) >= 18 then  
+            -- Escreve o dado 'wd' no endereço 'addr' se estiver após a 18ª instrução
+            mem(to_integer(unsigned(addr(7 downto 2)))) <= wd;
+         end if;
+      end if;
    end process;
+
+   -- Leitura sempre ocorre, o dado lido de 'mem' vai para a saída 'rd'
+   rd <= mem(to_integer(unsigned(addr(7 downto 2))));
+
 end synth;
