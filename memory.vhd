@@ -38,15 +38,14 @@ begin
    process(clk)
    begin
       if rising_edge(clk) then  -- A operação ocorre na borda de subida do clock
-         -- Converte o endereço para inteiro para comparação
-         if we = '1' and to_integer(unsigned(addr(7 downto 2))) >= 18 then  
-            -- Escreve o dado 'wd' no endereço 'addr' se estiver após a 18ª instrução
-            mem(to_integer(unsigned(addr(7 downto 2)))) <= wd;
+         if we = '1' then  
+            -- Escreve o dado 'wd' no endereço 'addr'
+            mem(to_integer(unsigned(addr(8 downto 2)))) <= wd;
          end if;
       end if;
    end process;
 
    -- Leitura sempre ocorre, o dado lido de 'mem' vai para a saída 'rd'
-   rd <= mem(to_integer(unsigned(addr(7 downto 2))));
+   rd <= mem(to_integer(unsigned(addr(8 downto 2))));
 
 end synth;
