@@ -12,8 +12,8 @@ entity datapath is -- MIPS datapath
         regdst: in STD_LOGIC;
         memtoreg: in STD_LOGIC;
         regwrite: in STD_LOGIC;
-        alusrcA: in STD_LOGIC;
-        alusrcB: in STD_LOGIC_VECTOR (1 downto 0);
+        alusrcA: inout STD_LOGIC;
+        alusrcB: inout STD_LOGIC_VECTOR (1 downto 0);
         alucontrol: in STD_LOGIC_VECTOR (2 downto 0);
         pcsrc: in STD_LOGIC_VECTOR (1 downto 0);
         readdata: in STD_LOGIC_VECTOR(31 downto 0);
@@ -21,7 +21,10 @@ entity datapath is -- MIPS datapath
         zero: out STD_LOGIC;
         instr: buffer STD_LOGIC_VECTOR (31 downto 0);
         writedata_B: buffer STD_LOGIC_VECTOR(31 downto 0);
-		  aluout: buffer STD_LOGIC_VECTOR (31 downto 0));
+		  srcA: buffer STD_LOGIC_VECTOR (31 downto 0);
+		  srcB: buffer STD_LOGIC_VECTOR (31 downto 0);
+		  aluresult: buffer STD_LOGIC_VECTOR (31 downto 0)
+		  );
 end datapath;
 
 
@@ -84,13 +87,10 @@ signal writereg_a3: STD_LOGIC_VECTOR (4 downto 0);
 signal writedata3: STD_LOGIC_VECTOR (31 downto 0);
 signal rd1, rd2: STD_LOGIC_VECTOR (31 downto 0);
 signal A: STD_LOGIC_VECTOR (31 downto 0);
-signal srcA: STD_LOGIC_VECTOR (31 downto 0);
 signal signimm, signimmsh: STD_LOGIC_VECTOR (31 downto 0);
-signal srcb: STD_LOGIC_VECTOR (31 downto 0);
 signal instrsh: STD_LOGIC_VECTOR (31 downto 0);
 signal pcjump: STD_LOGIC_VECTOR (31 downto 0);
-signal aluresult: STD_LOGIC_VECTOR (31 downto 0);
-
+signal aluout: STD_LOGIC_VECTOR (31 downto 0);
 
 begin
 
@@ -118,16 +118,14 @@ mux_alusrcA_inst: mux2 generic map (32) port map (pc, A, alusrcA, srcA);
 
 sl2_inst: sl2 port map (signimm, signimmsh);
 
-mux_alusrcB_inst: mux4 generic map (32) port map (writedata_B, "00000000000000000000000000000100", signimm, signimmsh, alusrcB, srcb);
+mux_alusrcB_inst: mux4 generic map (32) port map (writedata_B, X"00000004", signimm, signimmsh, alusrcB, srcB);
 
-ula_inst: ula port map (srcA, srcb, alucontrol, aluresult, zero);
+ula_inst: ula port map (srcA, srcB, alucontrol, aluresult, zero);
 
-instr_sl2_inst: sl2 port map ("000000" & instr(25 downto 0), instrsh);
-
-pcjump <= pc(31 downto 28) & instrsh(27 downto 0);
+pcjump <= pc(31 downto 28) & instr(25 downto 0) & "00";
 
 alureg_inst: reg generic map (32) port map (clk, reset, aluresult, aluout);
 
-mux_pcsrc_inst: mux4 generic map (32) port map (aluresult, aluout, pcjump, "00000000000000000000000000000000", pcsrc, pcnext);
+mux_pcsrc_inst: mux4 generic map (32) port map (aluresult, aluout, pcjump, X"00000000", pcsrc, pcnext);
 
 end struct;
