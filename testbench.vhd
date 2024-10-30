@@ -6,39 +6,58 @@ entity testbench is
 end testbench;
 
 architecture test of testbench is
-  -- Instância do componente comp
-  component comp
-    port(clk, reset:          in  STD_LOGIC;
-         writedata_B, addr:   out STD_LOGIC_VECTOR(31 downto 0);
-         memwrite:            out STD_LOGIC);
+  -- Instância do componente mips
+  component mips
+	  port(clk:               in  STD_LOGIC;
+			 reset:             in  STD_LOGIC;
+			 readdata:          inout  STD_LOGIC_VECTOR(31 downto 0);
+			 addr:              inout STD_LOGIC_VECTOR(31 downto 0);
+			 memwrite:          inout STD_LOGIC;
+			 writedata_B:       inout STD_LOGIC_VECTOR(31 downto 0);
+			 alusrcA: 			  inout STD_LOGIC;
+			 alusrcB: 			  inout STD_LOGIC_VECTOR (1 downto 0);
+			 srcA: 				  out STD_LOGIC_VECTOR (31 downto 0);
+			 srcB: 				  out STD_LOGIC_VECTOR (31 downto 0);
+			 aluresult: 		  out STD_LOGIC_VECTOR (31 downto 0)
+			 );
   end component;
 
-  signal writedata_B, addr:    STD_LOGIC_VECTOR(31 downto 0);
-  signal clk, reset,  memwrite: STD_LOGIC;
+  signal writedata_B, addr, readdata, srcA, srcB, aluresult: STD_LOGIC_VECTOR(31 downto 0);
+  signal clk, reset, memwrite, alusrcA: STD_LOGIC;
+  signal alusrcB: STD_LOGIC_VECTOR(1 downto 0);
 
 begin
-  -- Instancie o componente comp (MIPS multi-ciclo com memória)
-  dut: comp
-    port map(clk        => clk,
-             reset      => reset,
-             writedata_B => writedata_B,
-             addr       => addr,
-             memwrite   => memwrite);
+  -- Instancie o componente mips (MIPS multi-ciclo com memória)
+  dut: mips port map(
+            clk        => clk,
+            reset      => reset,
+            readdata   => readdata,
+            addr       => addr,
+            memwrite   => memwrite,
+            writedata_B => writedata_B,
+				alusrcA     => alusrcA,
+				alusrcB     => alusrcB,
+				srcA        => srcA,
+				srcB        => srcB,
+				aluresult   => aluresult
+				);
 
   -- Geração do clock com período de 10 ns
-  process begin
+  clk_process: process
+  begin
     clk <= '1';
-    wait for 5 ns;
+    wait for 5 ns; 
     clk <= '0';
     wait for 5 ns;
   end process;
 
-  -- Processo de reset (sinal de reset ativo nos primeiros 22 ns)
-  process begin
+  -- Processo de reset (sinal de reset ativo nos primeiros 2 ciclos)
+  reset_process: process
+  begin
     reset <= '1';
-    wait for 22 ns;
+    wait for 1 ns; 
     reset <= '0';
-    wait;
+    wait; 
   end process;
 
   -- Monitoramento e verificação do comportamento do processador
@@ -64,3 +83,4 @@ begin
   end process;
 
 end test;
+      
