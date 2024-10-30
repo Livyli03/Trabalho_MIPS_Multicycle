@@ -22,6 +22,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity fsm is
     Port ( op 				: in  STD_LOGIC_VECTOR (5 downto 0);
            clk 			    : in  STD_LOGIC;
+           reset 		    : in  STD_LOGIC;
            regdst 		    : out  STD_LOGIC;
            memtoreg 		: out  STD_LOGIC;
            regwrite 		: out  STD_LOGIC;
@@ -37,64 +38,93 @@ entity fsm is
 end fsm;
 
 architecture synth of fsm is
+--definição dos estados
+type tipo_estados is (S0, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11);
+signal estado, prox_estado: tipo_estados;
+ 
+begin
 
-signal estado : STD_LOGIC_VECTOR(3 downto 0);
- 
-begin
- 
-process(op, estado, clk)
- 
-begin
- 
-if rising_edge(clk) then
-        if estado = "0000" then
-        estado <= "0001";
-        elsif estado = "0001" then
-            --if lw ou sw
-            if op = "100011" or op = "101011" then
-            estado <= "0010";
-            --if Tipo-R
-            elsif op = "000000" then
-            estado <= "0110";
-            --if beq
-            elsif op = "000100" then
-            estado <= "1000";
-            --if addi
-            elsif op = "001000" then
-            estado <= "1001";
-            --if jump
-            elsif op = "000010" then
-            estado <= "1011";
-            end if;
-        elsif estado = "0010" then
-            --if lw
-            if op = "100011" then
-            estado <= "0011";
-            else
-            estado <= "0101";
-            end if;
-        elsif estado = "1001" then
-            estado <= "1010";
-        elsif estado = "1010" then
-            estado <= "0000";
-        elsif estado = "1011" then
-            estado <= "0000";
-        elsif estado = "0011" then
-            estado <= "0100";
-        elsif estado = "0100" then
-            estado <= "0000";
-        elsif estado = "0101" then
-            estado <= "0000";
-        elsif estado = "0110" then
-            estado <= "0111";
-        elsif estado = "0111" then
-            estado <= "0000";
-        elsif estado = "1000" then
-            estado <="0000";
+  process(clk, reset)
+  begin 
+    if reset = '1' then
+      estado <= S0;
+    elsif rising_edge(clk) then 
+      estado <= prox_estado;
+    end if;
+  end process;
+
+  -- lógica de próximo estado
+  process(estado, op)
+  begin
+    case estado is
+      when S0 =>
+        prox_estado <= S1;
+
+      when S1 =>
+        --if lw ou sw
+        if (op = "100011" or op = "101011") then 
+          prox_estado <= S2;
+        --if Tipo-R
+        elsif (op = "000000") then 
+          prox_estado <= S6;
+        --if beq
+        elsif (op = "000100") then 
+          prox_estado <= S8;
+        --if addi
+        elsif (op = "001000") then 
+          prox_estado <= S9;
+        --if jump
+        elsif (op = "000010") then 
+          prox_estado <= S11;
         end if;
-end if;
---fetch de instrução
-if estado = "0000" then
+
+      when S2 =>
+        --if lw
+        if (op = "100011") then
+          prox_estado <= S3;
+        else --sw
+          prox_estado <= S5;
+        end if;
+
+      when S3 => 
+        prox_estado <= S4;
+
+      when S4 =>
+        prox_estado <= S0;
+
+      when S5 =>
+        prox_estado <= S0;
+
+      when S6 =>
+        prox_estado <= S7;
+    
+      when S7 =>
+        prox_estado <= S0;
+
+      when S8 =>
+        prox_estado <= S0;
+
+      when S9 =>
+        prox_estado <= S10;
+
+      when S10 =>
+        prox_estado <= S0;
+
+      when S11 =>
+        prox_estado <= S0;
+
+      when others =>
+        prox_estado <= S0;
+
+    end case;
+  end process;
+
+  --saídas dos estados
+  process(estado)
+  begin
+    case estado is
+      --fetch de instrução
+      when S0 =>
         pcwrite <= '1';
         branch <= '0';
         IorD <= '0';
@@ -107,8 +137,8 @@ if estado = "0000" then
         alusrcA <='0';
         regwrite <='0';
         regdst <= '0';
-	--fetch de decodificação/registro
-    elsif estado = "0001" then
+      --fetch de decodificação/registro
+      when S1 =>
         pcwrite <= '0';
         branch <= '0';
         IorD <= '0';
@@ -121,8 +151,8 @@ if estado = "0000" then
         alusrcA <='0';
         regwrite <='0';
         regdst <= '0';
-	--lw/sw executar
-    elsif estado = "0010" then
+      --lw/sw executar
+      when S2 =>
         pcwrite <= '0';
         branch <= '0';
         IorD <= '0';
@@ -135,8 +165,8 @@ if estado = "0000" then
         alusrcA <='1';
         regwrite <='0';
         regdst <= '0';
-	--lw acesso de memória
-    elsif estado = "0011" then
+      --lw acesso de memória
+      when S3 =>
         pcwrite <= '0';
         branch <= '0';
         IorD <= '1';
@@ -149,8 +179,8 @@ if estado = "0000" then
         alusrcA <='0';
         regwrite <='0';
         regdst <= '0';
-	--lw write back
-    elsif estado = "0100" then
+	    --lw write back
+      when S4 =>
         pcwrite <= '0';
         branch <= '0';
         IorD <= '0';
@@ -163,8 +193,8 @@ if estado = "0000" then
         alusrcA <='0';
         regwrite <='1';
         regdst <= '0';
-	--sw write back
-    elsif estado = "0101" then
+	    --sw write back
+      when S5 =>
         pcwrite <= '0';
         branch <= '0';
         IorD <= '1';
@@ -177,8 +207,8 @@ if estado = "0000" then
         alusrcA <='0';
         regwrite <='0';
         regdst <= '0';
-    --Tipo-R execução
-    elsif estado = "0110" then
+      --Tipo-R execução
+      when S6 =>
         pcwrite <= '0';
         branch <= '0';
         IorD <= '0';
@@ -191,8 +221,8 @@ if estado = "0000" then
         alusrcA <='1';
         regwrite <='0';
         regdst <= '0';
-	--Tipo-R finalização
-    elsif estado = "0111" then
+      --Tipo-R finalização
+      when S7 =>
         pcwrite <= '0';
         branch <= '0';
         IorD <= '0';
@@ -205,8 +235,8 @@ if estado = "0000" then
         alusrcA <='0';
         regwrite <='1';
         regdst <= '1';
-	--BEQ finalização
-    elsif estado = "1000" then
+      --BEQ finalização
+      when S8 =>
         pcwrite <= '0';
         branch <= '1';
         IorD <= '0';
@@ -219,8 +249,8 @@ if estado = "0000" then
         alusrcA <='1';
         regwrite <='0';
         regdst <= '0';
-    --addi execução
-    elsif estado = "1001" then
+      --addi execução
+      when S9 =>
         pcwrite <= '0';
         branch <= '0';
         IorD <= '0';
@@ -233,8 +263,8 @@ if estado = "0000" then
         alusrcA <='1';
         regwrite <='0';
         regdst <= '0';
-    --addi write back
-    elsif estado = "1010" then
+      --addi write back
+      when S10 =>
         pcwrite <= '0';
         branch <= '0';
         IorD <= '0';
@@ -247,8 +277,8 @@ if estado = "0000" then
         alusrcA <='0';
         regwrite <='1';
         regdst <= '0';
-    --jump
-    elsif estado = "1011" then
+      --jump
+      when S11 =>
         pcwrite <= '0';
         branch <= '0';
         IorD <= '0';
@@ -261,8 +291,9 @@ if estado = "0000" then
         alusrcA <='0';
         regwrite <='0';
         regdst <= '0';
-end if;
-end process;
- 
-end synth;
+      when others =>
+        null;
+    end case;
+  end process;
 
+end synth;
